@@ -1,109 +1,54 @@
-### Exemplo 5 Para um modelo AR ####
+### Exemplo 4 Para um modelo de regressão Logistica ####
 rm(list=ls())
 require(rjags)
 require(coda)
 
-#### Gerando os dados ####
-set.seed(1234)
+data('mtcars')
+summary(mtcars)
 
-N <- 100
-sigma <- 4
-phi <- 0.4
+#### Definindo os dados #### 
+df <- mtcars[, c('vs', 'wt', 'disp', 'am')]
 
-y <- vector()
-
-y[1] <- rnorm(1, 0, sigma)
-
-for(t in 2:N){
-  y[t] <- rnorm(1, phi*y[t-1], sigma)
-}
-
-#### Coletando dados ####
-data_model <- list('y'= y, 'N' = N)
+data_model <- list('y' = as.vector(df$vs),
+                   'x_1' = as.vector(df$wt),
+                   'x_2' = as.vector(df$disp),
+                   'x_3' = as.vector(df$am),
+                   'K' = 2,
+                   'N' = nrow(df),
+                   'mu0' = 0, 'g0' = 0.1, #0.001
+                   'mu1' = 0, 'g1' = 0.1,
+                   'mu2' = 0, 'g2' = 0.1,
+                   'mu3' = 0, 'g3' = 0.1)
 
 ####Gerando o modelo e coletando amostra (sem descarte de burn-in)####
 model <- jags.model(file = 'Experimento_5.txt',
                     data = data_model, 
-                    n.chains = 2)
+                    n.chains = 2,
+                    n.adapt = 0)
 
 #Coletando a amostra
 collected_sample <- coda.samples(model, 
-                                 variable.names = c('phi', 'sigma'),
-                                 n.iter = 2000)
+                                 variable.names = c('b0', 'b1', 'b2', 'b3[2]'),
+                                 n.iter = 20000)
 
 par(mfrow=c(2,2))
 traceplot(collected_sample)
 
 ####Gerando o modelo e coletando amostra (com burn-in)####
-model <- jags.model(file = 'Experimento_5.txt', data = data_model, 
-                    n.chains = 4, n.adapt = 0)
-
-
-update(model, 500)
-#Coletando a amostra
-collected_sample <- coda.samples(model, 
-                                 variable.names = c('phi', 'sigma'),
-                                 n.iter = 1000)
-#### Análises ####
-gelman.diag(collected_sample)
-
-plot(collected_sample)
-plot(collected_sample[[1]])
-
-summary(collected_sample[[1]])
-
-lattice::densityplot(collected_sample[[1]])
-par(mfrow=c(2,2))
-traceplot(collected_sample[[1]])
-
-
-autocorr.plot(collected_sample[[1]])
-autocorr.diag(collected_sample[[1]])
-
-effectiveSize(collected_sample[[1]])
-BayesianTools::correlationPlot(collected_sample[[1]])
-
-#### AR(2) ####
-N <- 100
-sigma <- 4
-p <- 2
-phi <- c(0.4, 0.1)
-
-y <- vector()
-
-y[1] <- rnorm(1, 0, sigma)
-y[2] <- rnorm(1, y[1], sigma)
-
-for(t in (p+1):N){
-  y[t] <- rnorm(1, phi*y[(t-p):(t-1)], sigma)
-}
-
-data_model <- list('y'= y, 'N' = N, 'p'=p)
-
-####Gerando o modelo e coletando amostra ####
-model <- jags.model(file = 'Experimento_5_1.txt',
+model <- jags.model(file = 'Experimento_5.txt',
                     data = data_model, 
-                    n.chains = 2)
+                    n.chains = 4,
+                    n.adapt = 0)
+
+update(model, 10000)
 
 #Coletando a amostra
 collected_sample <- coda.samples(model, 
-                                 variable.names = c('phi', 'sigma'),
-                                 n.iter = 2000)
+                                 variable.names = c('b0', 'b1', 'b2', 'b3[2]'),
+                                 n.iter = 20000)
 
-par(mfrow=c(2,2))
-traceplot(collected_sample)
-
-model <- jags.model(file = 'Experimento_5_1.txt', data = data_model, 
-                    n.chains = 4, n.adapt = 0)
-
-
-update(model, 500)
-#Coletando a amostra
-collected_sample <- coda.samples(model, 
-                                 variable.names = c('phi', 'sigma'),
-                                 n.iter = 1000)
 #### Análises ####
-gelman.diag(collected_sample)
+gelman.diag(collected_sample, autoburnin = F)
 
 plot(collected_sample)
 plot(collected_sample[[1]])
@@ -120,3 +65,53 @@ autocorr.diag(collected_sample[[1]])
 
 effectiveSize(collected_sample[[1]])
 BayesianTools::correlationPlot(collected_sample[[1]])
+
+#### Reparametrização ####
+model_new <- jags.model(file = 'Experimento_5_1.txt',
+                    data = data_model, 
+                    n.chains = 2,
+                    n.adapt = 0)
+
+#Coletando a amostra
+collected_sample_new <- coda.samples(model_new, 
+                                 variable.names = c('b0', 'b1', 'b2', 'b3[2]'),
+                                 n.iter = 20000)
+
+par(mfrow=c(2,2))
+traceplot(collected_sample_new)
+
+model_new <- jags.model(file = 'Experimento_5_1.txt',
+                        data = data_model, 
+                        n.chains = 4,
+                        n.adapt = 0)
+update(model_new, 10000)
+#Coletando a amostra
+collected_sample_new <- coda.samples(model_new, 
+                                     variable.names = c('b0', 'b1', 'b2', 'b3[2]'),
+                                     n.iter = 20000)
+
+
+gelman.diag(collected_sample_new, autoburnin = F)
+
+plot(collected_sample_new)
+plot(collected_sample_new[[1]])
+
+summary(collected_sample_new[[1]])
+
+lattice::densityplot(collected_sample_new[[1]])
+par(mfrow=c(2,2))
+traceplot(collected_sample_new[[1]])
+
+
+autocorr.plot(collected_sample_new[[1]])
+autocorr.diag(collected_sample_new[[1]])
+
+effectiveSize(collected_sample_new[[1]])
+BayesianTools::correlationPlot(collected_sample_new[[1]])
+
+
+eff_1 <- sapply(collected_sample_new, effectiveSize)
+
+eff_2 <- sapply(collected_sample, effectiveSize)
+rowMeans(eff_2)
+rowMeans(eff_1)

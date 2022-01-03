@@ -5,8 +5,10 @@ model
     x[i] ~ dnorm(mu, tau)
   }
   
-  mu ~ dnorm(0, 0.001)
+  mu ~ dnorm(0, prec)
+  prec <- tau*0.001
   tau ~ dgamma(0.001, 0.001)
+  
   
   sigma <- 1/sqrt(tau)
 }

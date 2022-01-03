@@ -1,10 +1,12 @@
+### Exemplo 4 Para um modelo de regressão Logistica ####
 rm(list=ls())
-require(rjags)
+require(R2WinBUGS)
 require(coda)
 
 data('mtcars')
 summary(mtcars)
 
+#### Definindo os dados #### 
 df <- mtcars[, c('vs', 'wt', 'disp', 'am')]
 
 data_model <- list('y' = as.vector(df$vs),
@@ -18,7 +20,7 @@ data_model <- list('y' = as.vector(df$vs),
                    'mu2' = 0, 'g2' = 0.1,
                    'mu3' = 0, 'g3' = 0.1)
 
-
+####Gerando o modelo e coletando amostra (sem descarte de burn-in)####
 inits = function(){list(b0 = rnorm(1, 0, 1), 
                         b1 = rnorm(1, 0, 1), 
                         b2 = rnorm(1, 0, 1), 
@@ -26,26 +28,27 @@ inits = function(){list(b0 = rnorm(1, 0, 1),
 
 collected_sample <- bugs(data_model, inits, c('b0', 'b1', 'b2', 'b3'),
                          'Experimento_4.txt', n.chains = 2, n.iter = 20000,
-                         n.burnin = 0, bugs.directory = '/path_winbugs',
+                         n.burnin = 0, bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = T, n.thin=1)
 
 collected_sample <- bugs(data_model, inits, c('b0', 'b1', 'b2', 'b3'),
                          'Experimento_4_1.txt', n.chains = 2, n.iter = 20000,
-                         n.burnin = 0, bugs.directory = '/path_winbugs',
+                         n.burnin = 0, bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = T, n.thin=1)
 
 sample_mcmc <- as.mcmc.list(collected_sample)
 plot(sample_mcmc)
 
-
+####Gerando o modelo e coletando amostra (com burn-in)####
 collected_sample <- bugs(data_model, inits, c('b0', 'b1', 'b2', 'b3'),
                          'Experimento_4_1.txt', n.chains = 4, n.iter = 30000,
-                         n.burnin = 10000, bugs.directory = '/path_winbugs',
+                         n.burnin = 10000, bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = T, n.thin=1)
 
 sample_mcmc <- as.mcmc.list(collected_sample)
 plot(sample_mcmc)
 
+####Análises ####
 gelman.diag(sample_mcmc)
 
 plot(sample_mcmc[[1]])

@@ -1,4 +1,4 @@
-#Exemplo Para um modelo de regressão
+### Exemplo 2 Para um modelo de regressão ####
 
 rm(list=ls())
 require(rjags)
@@ -10,6 +10,7 @@ data("mtcars")
 
 head(mtcars)
 
+#### Definindo os dados #### 
 df <- mtcars[, c('mpg', 'disp', 'hp', 'wt')]
 
 data_model <- list('y' = as.vector(df$mpg),
@@ -35,7 +36,7 @@ collected_sample <- coda.samples(model,
 par(mfrow=c(2,2))
 traceplot(collected_sample)
 
-####Gerando o modelo e coletando amostra (com burn-in de 1500 iterações)####
+####Gerando o modelo e coletando amostra (com burn-in)####
 model <- jags.model(file = 'Experimento_2Rep.txt',
                     data = data_model,
                     n.chains = 4)
@@ -45,6 +46,7 @@ collected_sample <- coda.samples(model,
                                  variable.names = c('beta0', 'beta1', 'beta2', 'beta3', 'sigma'),
                                  n.iter = 4000) 
 
+#### Análises ####
 gelman.diag(collected_sample, autoburnin = F)
 
 plot(collected_sample)

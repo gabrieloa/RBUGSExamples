@@ -1,4 +1,4 @@
-#Exemplo Para um modelo de regressão
+### Exemplo 2 Para um modelo de regressão ####
 
 rm(list=ls())
 require(rjags)
@@ -10,6 +10,7 @@ data("mtcars")
 
 head(mtcars)
 
+#### Definindo os dados #### 
 df <- mtcars[, c('mpg', 'disp', 'hp', 'wt')]
 
 data_model <- list('y' = as.vector(df$mpg),
@@ -31,11 +32,12 @@ collected_sample <- bugs(data_model, inits, c('beta0', 'beta1', 'beta2',
                                               'beta3', 'sigma'),
                          'Experimento_2Rep.txt', n.chains = 4, n.iter = 5500, 
                          n.thin=1, n.burnin = 1500, 
-                         bugs.directory = 'path_winbugs',
+                         bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = T)
 
 sample_mcmc <- as.mcmc.list(collected_sample)
 
+#### Análises ####
 gelman.diag(collected_sample, autoburnin = F)
 
 plot(sample_mcmc[[1]])
@@ -57,7 +59,7 @@ collected_sample_old <- bugs(data_model, inits, c('beta0', 'beta1', 'beta2',
                                               'beta3', 'sigma'),
                          'Experimento_2.txt', n.chains = 4, n.iter = 5500, 
                          n.thin=1, n.burnin = 1500, 
-                         bugs.directory = 'path_winbugs',
+                         bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = F)
 
 sample_mcmc_old <- as.mcmc.list(collected_sample_old)

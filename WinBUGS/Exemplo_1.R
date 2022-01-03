@@ -1,4 +1,4 @@
-#Exemplo Para um modelo de regressão
+### Exemplo 1 Para um modelo de regressão ####
 
 rm(list=ls())
 require(R2WinBUGS)
@@ -6,7 +6,7 @@ require(coda)
 
 set.seed(42)
 
-##Gerando os dados
+##### Gerando os dados ####
 sample_size <- 30
 
 x <- rnorm(sample_size)
@@ -21,27 +21,28 @@ y <- rnorm(sample_size, mean = mu, sd = sigma)
 data_frame <- data.frame(y = y, x = x)
 head(data_frame)
 
-##Definindo os dados 
+#### Definindo os dados ####
 data_model <- list('n'= sample_size, 'y' = y, 'x' = x)
 inits = function(){list(beta0 = rnorm(1), beta1 = rnorm(1), 
                         tau = rgamma(1,1,1))}
-
+#### Gerando o modelo e coletando amostra (sem descarte de burn-in) ####
 collected_sample <- bugs(data_model, inits, c('beta0', 'beta1', 'sigma'),
                          'Experimento_1.txt', n.chains = 2, n.iter = 2000,
-                         n.burnin = 0, bugs.directory = 'path_winbugs',
+                         n.burnin = 0, bugs.directory = '/home/gabriel/Downloads/WinBUGS/',
                          debug = T, n.thin=1)
 
 sample_mcmc <- as.mcmc.list(collected_sample)
 
 traceplot(sample_mcmc)
 
-
+#### Gerando o modelo e coletando amostra (com burn-in de 500 iterações) ####
 collected_sample <- bugs(data_model, inits, c('beta0', 'beta1', 'sigma'),
                          'Experimento_1.txt', n.chains = 4, n.iter = 1500,
-                         n.burnin = 500, bugs.directory = 'path_winbugs')
+                         n.burnin = 500, bugs.directory = '/home/gabriel/Downloads/WinBUGS/')
 
 sample_mcmc <- as.mcmc.list(collected_sample)
 
+#### Análises ####
 gelman.diag(sample_mcmc, autoburnin=F)
 
 plot(sample_mcmc[[1]])

@@ -1,0 +1,14 @@
+model{
+  ##likelihood
+  for(i in 1:N){
+    y[i] ~ dnorm(mu[i], tau)
+    mu[i] <- beta0 + beta1 * x_1[i] + beta2 * x_2[i] 
+  }
+  
+  ##priors
+  beta0 ~ dnorm(mu0, g0)
+  beta1 ~ dnorm(mu1, g1)
+  beta2 ~ dnorm(mu2, g2)
+  tau ~ dgamma(a, b)
+  sigma <- 1/sqrt(tau)
+}

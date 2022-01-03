@@ -1,3 +1,4 @@
+### Exemplo 4 Para um modelo de regressão Logistica ####
 rm(list=ls())
 require(rjags)
 require(coda)
@@ -5,6 +6,7 @@ require(coda)
 data('mtcars')
 summary(mtcars)
 
+#### Definindo os dados #### 
 df <- mtcars[, c('vs', 'wt', 'disp', 'am')]
 
 data_model <- list('y' = as.vector(df$vs),
@@ -32,6 +34,7 @@ collected_sample <- coda.samples(model,
 par(mfrow=c(2,2))
 traceplot(collected_sample)
 
+####Gerando o modelo e coletando amostra (com burn-in)####
 model <- jags.model(file = 'Experimento_4.txt',
                     data = data_model, 
                     n.chains = 4,
@@ -44,6 +47,7 @@ collected_sample <- coda.samples(model,
                                  variable.names = c('b0', 'b1', 'b2', 'b3[2]'),
                                  n.iter = 20000)
 
+#### Análises ####
 gelman.diag(collected_sample, autoburnin = F)
 
 plot(collected_sample)
@@ -62,7 +66,7 @@ autocorr.diag(collected_sample[[1]])
 effectiveSize(collected_sample[[1]])
 BayesianTools::correlationPlot(collected_sample[[1]])
 
-####Reparametrização
+#### Reparametrização ####
 model_new <- jags.model(file = 'Experimento_4_1.txt',
                     data = data_model, 
                     n.chains = 2,

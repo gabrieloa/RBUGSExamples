@@ -1,4 +1,4 @@
-#Exemplo Para um modelo de regressão logistica
+### Exemplo 3 Para um modelo de regressão Logistica ####
 
 rm(list=ls())
 require(rjags)
@@ -7,6 +7,7 @@ require(coda)
 data('mtcars')
 summary(mtcars)
 
+#### Definindo os dados #### 
 df <- mtcars[, c('vs', 'wt', 'disp')]
 
 data_model <- list('y' = as.vector(df$vs),
@@ -22,7 +23,6 @@ model <- jags.model(file = 'Experimento_3.txt',
                     data = data_model, 
                     n.chains = 2)
 
-#Coletando a amostra
 collected_sample <- coda.samples(model, 
                                  variable.names = c('b0', 'b1', 'b2'),
                                  n.iter = 2000)
@@ -43,7 +43,7 @@ collected_sample <- coda.samples(model,
 par(mfrow=c(2,2))
 traceplot(collected_sample)
 
-####Gerando o modelo e coletando amostra (com burn-in de 1000 iterações)####
+####Gerando o modelo e coletando amostra (com burn-in)####
 model <- jags.model(file = 'Experimento_3.txt', data = data_model, 
                     n.chains = 4, n.adapt = 0)
 
@@ -54,6 +54,7 @@ collected_sample <- coda.samples(model,
                                  variable.names = c('b0', 'b1', 'b2'),
                                  n.iter = 5000)
 
+#### Análises ####
 gelman.diag(collected_sample)
 
 plot(collected_sample)
@@ -72,7 +73,7 @@ autocorr.diag(collected_sample[[1]])
 effectiveSize(collected_sample[[1]])
 BayesianTools::correlationPlot(collected_sample[[1]])
 
-####Gerando o modelo e coletando amostra (com burn-in de 1000 iterações)####
+####Gerando o modelo e coletando amostra (com burn-in de 2000 iterações)####
 model <- jags.model(file = 'Experimento_3.txt', data = data_model, 
                     n.chains = 4, n.adapt = 0)
 
@@ -101,7 +102,7 @@ autocorr.diag(collected_sample[[1]])
 effectiveSize(collected_sample[[1]])
 BayesianTools::correlationPlot(collected_sample[[1]])
 
-###Reparametrizado
+#### Reparametrizado ####
 model_new <- jags.model(file = 'Experimento_3Rep.txt', data = data_model, 
                         n.chains = 4, n.adapt = 0)
 update(model_new, 2000)

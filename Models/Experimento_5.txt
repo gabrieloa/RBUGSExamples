@@ -1,13 +1,14 @@
-model
-    {
-    
-    for (i in 2:N){
-    y[i] ~ dnorm(mu[i], tau)
-    mu[i] <- phi * y[i-1]
+model{
+    for(i in 1:N){
+    y[i] ~ dbern(p[i])
+    logit(p[i]) <- b0 + b1*x_1[i] + b2*x_2[i] + b3[x_3[i]+1]
     }
-    
-    phi ~ dnorm(0, 0.001)
-    tau ~ dgamma(0.0001, 0.0001)
-    sigma <- 1/sqrt(tau)
-    }
-    
+  
+  b3[1] <- 0
+  for(k in 2:K){  
+  b3[k] ~ dnorm(mu3, g3)
+  }
+  b0 ~ dnorm(mu0, g0)
+  b1 ~ dnorm(mu1, g1)
+  b2 ~ dnorm(mu2, g2)
+}

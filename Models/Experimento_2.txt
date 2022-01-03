@@ -1,16 +1,16 @@
-model{
-##likelihood
-for(i in 1:N){
-y[i] ~ dnorm(mu[i], tau)
-mu[i] <- beta0 + beta1 * x_1[i] + beta2 * x_2[i] + beta3 * x_3[i]
-}
-
-##priors
-beta0 ~ dnorm(mu0, g0)
-beta1 ~ dnorm(mu1, g1)
-beta2 ~ dnorm(mu2, g2)
-beta3 ~ dnorm(mu3, g3)
-tau ~ dgamma(a, b)
-sigma <- 1/sqrt(tau)
-}
+model
+    {
+    
+    for (i in 1:n){
+    y[i] ~ dnorm(mu[i], tau)
+    mu[i] <- beta0 + beta1 * x[i]
+    }
+    
+    beta0 ~ dnorm(0, 0.001)
+    beta1 ~ dnorm(0, 0.001)
+    
+    tau ~ dgamma(0.001, 0.001)
+    
+    sigma <- 1/sqrt(tau)
+    }
     
